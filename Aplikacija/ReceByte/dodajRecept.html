@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>*RECEBYTE*</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <link href="assets/img/logo2.png" rel="icon">
+  <link href="assets/img/logo2.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" rel="stylesheet">
+
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/ionicons/css/ionicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
+  <link href="assets/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <link href="assets/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+
+<body ng-app="noviReceptApp">
+  <nav class="navbar navbar-default navbar-trans navbar-expand-lg fixed-top">
+    <div class="container">
+      <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarDefault"
+        aria-controls="navbarDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <a class="navbar-brand text-brand" href="index.html">Rece<span class="color-b">Byte</span></a>
+      
+      <div class="navbar-collapse collapse justify-content-center" id="navbarDefault">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="index.html">Početna</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="recepti.html">Recepti</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="user.html">Moj&nbsp;profil</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="prijaviSe.html">Prijavi&nbsp;se</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="kontakt.html">Kontakt</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <main id="main">
+
+      <section class="intro-single">
+        <div class="container">
+
+          <div class="row">
+            <div class="col-md-12 col-lg-8">
+              <div class="title-single-box">
+                <h1 class="title-single">Dodaj recept</h1>
+                <form action="BufferedSingleFileUploadPhysical/?handler=UploadAsync" enctype="multipart/form-data"
+                  onsubmit="AJAXSubmit(this);return false;" method="post">
+                  <dl>
+                    <dt>
+                      <label for="FileUpload_FormFile">File</label>
+                    </dt>
+                    <dd>
+                      <input id="FileUpload_FormFile" type="file" name="FileUpload.FormFile" />
+                    </dd>
+                  </dl>
+
+                  <input class="btn btn--b" type="submit" value="Upload" />
+
+                  <div style="margin-top:15px">
+                    <output name="result"></output>
+                  </div>
+                  <label class="important">*Unesite prvo sliku</label>
+                </form>
+
+                <script>
+                  async function AJAXSubmit(oFormElement) {
+                    var resultElement = oFormElement.elements.namedItem("result");
+                    const formData = new FormData(oFormElement);
+
+                    try {
+                      const response = await fetch("https://localhost:5001/Recepti", {
+                        method: 'POST',
+                        headers: {
+
+                          "Authorization": "Bearer " + sessionStorage.getItem("token")
+                        },
+                        body: formData
+                      }).then(p =>p.json()).then(data =>{
+                        sessionStorage.setItem("image" ,data.uniqueFileName);
+                      })
+
+
+                    } catch (error) {
+                      console.error('Error:', error);
+                    }
+                  }
+                </script>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+      <section class="recept nav-arrow-b">
+        <div ng-controller="sastojciNoviReceptCtrl">
+          <form name="sastFotm" novalidate="novalidate">
+            <div class="col-lg-3 col-sm-6 mb-6">
+              <div class="title-box-d section-t4">
+                <h3 class="title-d">Sastojci:</h3>
+              </div>
+            </div>
+            <div class="col-md-12 mb-3">
+              <div class="form-group">
+                <div id="sastojciDodajRecept">
+
+                </div>
+                <input class="form-control form-control-lg form-control-a" ng-model="sastojak" type="text" required=""
+                  id="povrce" name="povrce" />
+                <div ng-show="sastFotm.$submitted">
+                  <div ng-show="sastFotm.povrce.$error.required">
+                  </div>
+                </div>
+                <p></p>
+                <button type="submit" class="btn btn-a" ng-click="dodaj()">Dodaj sastojak</button>
+                <p>{{errortext}}</p>
+
+              </div>
+            </div>
+          </form>
+        </div>
+        <form ng-controller="noviReceptCtrl" name="myForm" ng-submit="add(myForm)" novalidate>
+          <div class="row">
+            </div>
+          <div class="col-md-12 mb-3">
+            <div class="form-group">
+              <h2 class="title-box-d section-t4">Naziv recepta:</h2>
+              <input type="text" name="nazivRecepta" class="form-control form-control-lg form-control-a"
+                ng-model="nazivRecepta" required>
+              <div ng-show="myForm.$submitted ||myForm.nazivRecepta.$touched">
+                <span style="color: red;" ng-show="myForm.nazivRecepta.$error.required">Neophodno je uneti naziv
+                  recepta!</span>
+              </div>
+              <span id="reqTxtName" class="reqError"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="title-box-d section-t4">
+                <h3 class="title-d">Karakteristike</h3>
+                <p></p>
+              </div>
+            </div>
+            <div class="col-md-12 mb-3">
+              <div class="form-group">
+                <label class="breadcrumb-item active">Vreme pripreme:</label>
+                <input type="number" name="vremePripreme" class="form-control form-control-lg form-control-a"
+                  ng-model="vremePripreme" required>
+                <div ng-show="myForm.$submitted || myForm.vremePripreme.$touched">
+                  <span style="color: red;" ng-show="myForm.vremePripreme.$error.required">Neophodno je uneti vreme
+                    potrebno za pripremu recepta!</span>
+                </div>
+                <span id="reqTxtName" class="reqError"></span>
+                <div style="color: black;">* Vreme pripreme mora biti u minutima</div>
+              </div>
+            </div>
+            <div class="col-md-12 mb-3">
+              <div class="form-group">
+                <label class="breadcrumb-item active">Kalorijska vrednost:</label>
+                <input type="number" name="kalorijskaVrednost" class="form-control form-control-lg form-control-a"
+                  ng-model="kalorijskaVrednost" required>
+                <div ng-show="myForm.$submitted || myForm.kalorijskaVrednost.$touched">
+                  <span style="color: red;" ng-show="myForm.kalorijskaVrednost.$error.required">Neophodno je
+                    kalorijskaVrednost recepta!</span>
+                </div>
+              </div>
+              <span id="reqTxtName" class="reqError"></span>
+            </div>
+
+            <div class="col-md-12 mb-3">
+              <div class="form-group">
+                <label class="breadcrumb-item active">Broj porcija:</label>
+                <input type="number" name="brojPorcija" class="form-control form-control-lg form-control-a"
+                  ng-model="brojPorcija" required>
+                <div ng-show="myForm.$submitted || myForm.brojPorcija.$touched">
+                  <span style="color: red;" ng-show="myForm.brojPorcija.$error.required">Neophodno je brojPorcija
+                    recepta!</span>
+                </div>
+                <span id="reqTxtName" class="reqError"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-12">
+            <div class="title-box-d section-t4">
+              <h3 class="title-d">Način pripreme</h3>
+            </div>
+          </div>
+          <div class="col-md-12 mb-3">
+            <div class="form-group">
+              <label for="textMessage">Način pripreme:</label>
+              <input type="textarea" style="width:flex;height:150px;" name="nacinPripreme"
+                class="form-control form-control-lg form-control-a" ng-model="nacinPripreme" cols="45" rows="8"
+                required>
+
+              <div ng-show="myForm.$submitted || myForm.nacinPripreme.$touched">
+                <span style="color: red;" ng-show="myForm.nacinPripreme.$error.required">Neophodno je nacinPripreme
+                  recepta!</span>
+              </div>
+              <span id="reqTxtName" class="reqError"></span>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <p><button class="btn btn-a" type="submit" ng-click="addRecept()">Pošalji recept</button></p>
+
+          </div>
+        </form>
+      </section>
+      </section>
+    </main>
+  </div>
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <nav class="nav-footer">
+            <ul class="list-inline">
+              <li class="list-inline-item">
+                <a href="index.html">Početna</a>
+              </li>
+              <li class="list-inline-item">
+                <a href="recepti.html">Recepti</a>
+              </li>
+              <li class="list-inline-item">
+                <a href="kontakt.html">Kontakt</a>
+              </li>
+            </ul>
+          </nav>
+          <div class="socials-a">
+            <ul class="list-inline">
+              <li class="list-inline-item">
+                <a href="#">
+                  <i class="fa fa-facebook" aria-hidden="true"></i>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="#">
+                  <i class="fa fa-twitter" aria-hidden="true"></i>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="#">
+                  <i class="fa fa-instagram" aria-hidden="true"></i>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="#">
+                  <i class="fa fa-pinterest-p" aria-hidden="true"></i>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="#">
+                  <i class="fa fa-dribbble" aria-hidden="true"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="copyright-footer">
+            <p class="copyright color-text-a">
+              &copy; Copyright
+              <span class="color-a">ReceByte</span> All Rights Reserved.
+            </p>
+          </div>
+          <div class="credits">
+            Designed by SANTim</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+  <div id="preloader"></div>
+
+  <script src="assets/vendor/jquery/jquery.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+  <script src="assets/vendor/scrollreveal/scrollreveal.min.js"></script>
+
+  <script type="module" src="assets/js/main.js"></script>
+  <script type="module" src="assets/js/dodajReceptHTML.js"></script>
+</body>
+
+</html>
